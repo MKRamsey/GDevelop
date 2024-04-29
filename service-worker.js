@@ -5,7 +5,7 @@ if (typeof importScripts === 'function') {
   /* global workbox */
   if (workbox) {
     // Will be replaced by make-service-worker.js to include the proper version.
-    const VersionMetadata = {"version":"5.3.201","gitHash":"70508292e4c82fa715f844d88f706c27937b18e7","versionWithHash":"5.3.201-70508292e4c82fa715f844d88f706c27937b18e7"};
+    const VersionMetadata = {"version":"5.3.201","gitHash":"7d89208e7b3e4f73427627acbc3c397bcb864d46","versionWithHash":"5.3.201-7d89208e7b3e4f73427627acbc3c397bcb864d46"};
 
     // Contrary to other static assets (JS, CSS, HTML), libGD.js/wasm are not
     // versioned in their filenames. Instead, we version using a query string
