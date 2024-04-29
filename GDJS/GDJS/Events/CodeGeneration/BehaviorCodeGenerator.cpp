@@ -25,7 +25,7 @@ gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorCompleteCode(
   auto generateInitializePropertiesCode = [&]() {
     gd::String runtimeBehaviorDataInitializationCode;
     for (auto& property :
-          eventsBasedBehavior.GetPropertyDescriptors().GetInternalVector()) {
+         eventsBasedBehavior.GetPropertyDescriptors().GetInternalVector()) {
       runtimeBehaviorDataInitializationCode +=
           property->IsHidden()
               ? GenerateInitializePropertyFromDefaultValueCode(*property)
@@ -38,10 +38,10 @@ gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorCompleteCode(
   auto generatePropertiesCode = [&]() {
     gd::String runtimeBehaviorPropertyMethodsCode;
     for (auto& property :
-          eventsBasedBehavior.GetPropertyDescriptors().GetInternalVector()) {
+         eventsBasedBehavior.GetPropertyDescriptors().GetInternalVector()) {
       runtimeBehaviorPropertyMethodsCode +=
-          GenerateRuntimeBehaviorPropertyTemplateCode(
-              eventsBasedBehavior, *property);
+          GenerateRuntimeBehaviorPropertyTemplateCode(eventsBasedBehavior,
+                                                      *property);
     }
 
     return runtimeBehaviorPropertyMethodsCode;
@@ -49,8 +49,8 @@ gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorCompleteCode(
 
   auto generateInitializeSharedPropertiesCode = [&]() {
     gd::String runtimeBehaviorSharedDataInitializationCode;
-    for (auto& property :
-          eventsBasedBehavior.GetSharedPropertyDescriptors().GetInternalVector()) {
+    for (auto& property : eventsBasedBehavior.GetSharedPropertyDescriptors()
+                              .GetInternalVector()) {
       runtimeBehaviorSharedDataInitializationCode +=
           property->IsHidden()
               ? GenerateInitializeSharedPropertyFromDefaultValueCode(*property)
@@ -62,18 +62,18 @@ gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorCompleteCode(
 
   auto generateSharedPropertiesCode = [&]() {
     gd::String runtimeBehaviorSharedPropertyMethodsCode;
-    for (auto& property :
-          eventsBasedBehavior.GetSharedPropertyDescriptors().GetInternalVector()) {
+    for (auto& property : eventsBasedBehavior.GetSharedPropertyDescriptors()
+                              .GetInternalVector()) {
       runtimeBehaviorSharedPropertyMethodsCode +=
-          GenerateRuntimeBehaviorSharedPropertyTemplateCode(
-              eventsBasedBehavior, *property);
+          GenerateRuntimeBehaviorSharedPropertyTemplateCode(eventsBasedBehavior,
+                                                            *property);
     }
 
     return runtimeBehaviorSharedPropertyMethodsCode;
   };
 
-  // TODO: Update code generation to be able to generate methods (which would allow
-  // for a cleaner output, not having to add methods to the prototype).
+  // TODO: Update code generation to be able to generate methods (which would
+  // allow for a cleaner output, not having to add methods to the prototype).
   auto generateMethodsCode = [&]() {
     gd::String runtimeBehaviorMethodsCode;
     for (auto& eventsFunction : eventsFunctionsVector) {
@@ -83,9 +83,9 @@ gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorCompleteCode(
               ? behaviorMethodMangledNames.find(eventsFunction->GetName())
                     ->second
               : "UNKNOWN_FUNCTION_fix_behaviorMethodMangledNames_please";
-      gd::String methodCodeNamespace =
-          codeNamespace + "." + eventsBasedBehavior.GetName() +
-          ".prototype." + functionName + "Context";
+      gd::String methodCodeNamespace = codeNamespace + "." +
+                                       eventsBasedBehavior.GetName() +
+                                       ".prototype." + functionName + "Context";
       gd::String methodFullyQualifiedName = codeNamespace + "." +
                                             eventsBasedBehavior.GetName() +
                                             ".prototype." + functionName;
@@ -116,9 +116,8 @@ gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorCompleteCode(
         eventsBasedBehavior.GetEventsFunctions().HasEventsFunctionNamed(
             doStepPreEventsFunctionName);
     if (!hasDoStepPreEventsFunction) {
-      runtimeBehaviorMethodsCode +=
-          GenerateDefaultDoStepPreEventsFunctionCode(eventsBasedBehavior,
-                                                      codeNamespace);
+      runtimeBehaviorMethodsCode += GenerateDefaultDoStepPreEventsFunctionCode(
+          eventsBasedBehavior, codeNamespace);
     }
 
     return runtimeBehaviorMethodsCode;
@@ -127,13 +126,35 @@ gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorCompleteCode(
   auto generateUpdateFromBehaviorDataCode = [&]() {
     gd::String updateFromBehaviorCode;
     for (auto& property :
-          eventsBasedBehavior.GetPropertyDescriptors().GetInternalVector()) {
-      updateFromBehaviorCode +=
-          GenerateUpdatePropertyFromBehaviorDataCode(
-              eventsBasedBehavior, *property);
+         eventsBasedBehavior.GetPropertyDescriptors().GetInternalVector()) {
+      updateFromBehaviorCode += GenerateUpdatePropertyFromBehaviorDataCode(
+          eventsBasedBehavior, *property);
     }
 
     return updateFromBehaviorCode;
+  };
+
+  auto generateGetNetworkSyncDataCode = [&]() {
+    gd::String getNetworkSyncDataCode;
+    for (auto& property :
+         eventsBasedBehavior.GetPropertyDescriptors().GetInternalVector()) {
+      getNetworkSyncDataCode += GenerateGetPropertyNetworkSyncDataCode(
+          eventsBasedBehavior, *property);
+    }
+
+    return getNetworkSyncDataCode;
+  };
+
+  auto generateUpdateFromNetworkSyncDataCode = [&]() {
+    gd::String updateFromNetworkSyncDataCode;
+    for (auto& property :
+         eventsBasedBehavior.GetPropertyDescriptors().GetInternalVector()) {
+      updateFromNetworkSyncDataCode +=
+          GenerateUpdatePropertyFromNetworkSyncDataCode(eventsBasedBehavior,
+                                                        *property);
+    }
+
+    return updateFromNetworkSyncDataCode;
   };
 
   return GenerateRuntimeBehaviorTemplateCode(
@@ -145,7 +166,9 @@ gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorCompleteCode(
       generateInitializeSharedPropertiesCode,
       generateSharedPropertiesCode,
       generateMethodsCode,
-      generateUpdateFromBehaviorDataCode);
+      generateUpdateFromBehaviorDataCode,
+      generateGetNetworkSyncDataCode,
+      generateUpdateFromNetworkSyncDataCode);
 }
 
 gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorTemplateCode(
@@ -157,7 +180,9 @@ gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorTemplateCode(
     std::function<gd::String()> generateInitializeSharedPropertiesCode,
     std::function<gd::String()> generateSharedPropertiesCode,
     std::function<gd::String()> generateMethodsCode,
-    std::function<gd::String()> generateUpdateFromBehaviorDataCode) {
+    std::function<gd::String()> generateUpdateFromBehaviorDataCode,
+    std::function<gd::String()> generateGetNetworkSyncDataCode,
+    std::function<gd::String()> generateUpdateFromNetworkSyncDataCode) {
   return gd::String(R"jscode_template(
 CODE_NAMESPACE = CODE_NAMESPACE || {};
 
@@ -183,6 +208,19 @@ CODE_NAMESPACE.RUNTIME_BEHAVIOR_CLASSNAME = class RUNTIME_BEHAVIOR_CLASSNAME ext
     UPDATE_FROM_BEHAVIOR_DATA_CODE
 
     return true;
+  }
+
+  // Network sync:
+  getNetworkSyncData() {
+    return {
+      ...super.getNetworkSyncData(),
+      props: {
+        GET_NETWORK_SYNC_DATA_CODE
+      }
+    };
+  }
+  updateFromNetworkSyncData(networkSyncData) {
+    UPDATE_FROM_NETWORK_SYNC_DATA_CODE
   }
 
   // Properties:
@@ -228,7 +266,12 @@ gdjs.registerBehavior("EXTENSION_NAME::BEHAVIOR_NAME", CODE_NAMESPACE.RUNTIME_BE
                       generateInitializeSharedPropertiesCode())
       .FindAndReplace("INITIALIZE_PROPERTIES_CODE",
                       generateInitializePropertiesCode())
-      .FindAndReplace("UPDATE_FROM_BEHAVIOR_DATA_CODE", generateUpdateFromBehaviorDataCode())
+      .FindAndReplace("UPDATE_FROM_BEHAVIOR_DATA_CODE",
+                      generateUpdateFromBehaviorDataCode())
+      .FindAndReplace("GET_NETWORK_SYNC_DATA_CODE",
+                      generateGetNetworkSyncDataCode())
+      .FindAndReplace("UPDATE_FROM_NETWORK_SYNC_DATA_CODE",
+                      generateUpdateFromNetworkSyncDataCode())
       // It must be done before PROPERTIES_CODE.
       .FindAndReplace("SHARED_PROPERTIES_CODE", generateSharedPropertiesCode())
       .FindAndReplace("PROPERTIES_CODE", generatePropertiesCode())
@@ -299,8 +342,9 @@ gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorPropertyTemplateCode(
 }
 
 gd::String BehaviorCodeGenerator::GenerateToggleBooleanPropertyTemplateCode(
-    const gd::String &toggleFunctionName, const gd::String &getterName,
-    const gd::String &setterName) {
+    const gd::String& toggleFunctionName,
+    const gd::String& getterName,
+    const gd::String& setterName) {
   return gd::String(R"jscode_template(
   TOGGLE_NAME() {
     this.SETTER_NAME(!this.GETTER_NAME());
@@ -310,7 +354,8 @@ gd::String BehaviorCodeGenerator::GenerateToggleBooleanPropertyTemplateCode(
       .FindAndReplace("SETTER_NAME", setterName);
 }
 
-gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorSharedPropertyTemplateCode(
+gd::String
+BehaviorCodeGenerator::GenerateRuntimeBehaviorSharedPropertyTemplateCode(
     const gd::EventsBasedBehavior& eventsBasedBehavior,
     const gd::NamedPropertyDescriptor& property) {
   return gd::String(R"jscode_template(
@@ -321,10 +366,12 @@ gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorSharedPropertyTemplateC
     this.PROPERTY_NAME = newValue;
   }TOGGLE_PROPERTY_CODE)jscode_template")
       .FindAndReplace("PROPERTY_NAME", property.GetName())
-      .FindAndReplace("GETTER_NAME",
-                      GetBehaviorSharedPropertyGetterInternalName(property.GetName()))
-      .FindAndReplace("SETTER_NAME",
-                      GetBehaviorSharedPropertySetterInternalName(property.GetName()))
+      .FindAndReplace(
+          "GETTER_NAME",
+          GetBehaviorSharedPropertyGetterInternalName(property.GetName()))
+      .FindAndReplace(
+          "SETTER_NAME",
+          GetBehaviorSharedPropertySetterInternalName(property.GetName()))
       .FindAndReplace("DEFAULT_VALUE", GeneratePropertyValueCode(property))
       .FindAndReplace("RUNTIME_BEHAVIOR_CLASSNAME",
                       eventsBasedBehavior.GetName())
@@ -332,9 +379,12 @@ gd::String BehaviorCodeGenerator::GenerateRuntimeBehaviorSharedPropertyTemplateC
           "TOGGLE_PROPERTY_CODE",
           (property.GetType() == "Boolean"
                ? GenerateToggleBooleanPropertyTemplateCode(
-                     GetBehaviorSharedPropertyToggleFunctionInternalName(property.GetName()),
-                     GetBehaviorSharedPropertyGetterInternalName(property.GetName()),
-                     GetBehaviorSharedPropertySetterInternalName(property.GetName()))
+                     GetBehaviorSharedPropertyToggleFunctionInternalName(
+                         property.GetName()),
+                     GetBehaviorSharedPropertyGetterInternalName(
+                         property.GetName()),
+                     GetBehaviorSharedPropertySetterInternalName(
+                         property.GetName()))
                : ""));
 }
 
@@ -347,12 +397,27 @@ gd::String BehaviorCodeGenerator::GenerateUpdatePropertyFromBehaviorDataCode(
       .FindAndReplace("PROPERTY_NAME", property.GetName());
 }
 
+gd::String BehaviorCodeGenerator::GenerateGetPropertyNetworkSyncDataCode(
+    const gd::EventsBasedBehavior& eventsBasedBehavior,
+    const gd::NamedPropertyDescriptor& property) {
+  return gd::String(R"jscode_template(
+    PROPERTY_NAME: this._behaviorData.PROPERTY_NAME,)jscode_template")
+      .FindAndReplace("PROPERTY_NAME", property.GetName());
+}
+
+gd::String BehaviorCodeGenerator::GenerateUpdatePropertyFromNetworkSyncDataCode(
+    const gd::EventsBasedBehavior& eventsBasedBehavior,
+    const gd::NamedPropertyDescriptor& property) {
+  return gd::String(R"jscode_template(
+    if (networkSyncData.PROPERTY_NAME !== undefined)
+      this._behaviorData.PROPERTY_NAME = networkSyncData.PROPERTY_NAME;)jscode_template")
+      .FindAndReplace("PROPERTY_NAME", property.GetName());
+}
+
 gd::String BehaviorCodeGenerator::GeneratePropertyValueCode(
     const gd::PropertyDescriptor& property) {
-  if (property.GetType() == "String" ||
-      property.GetType() == "Choice" ||
-      property.GetType() == "Color" ||
-      property.GetType() == "Behavior") {
+  if (property.GetType() == "String" || property.GetType() == "Choice" ||
+      property.GetType() == "Color" || property.GetType() == "Behavior") {
     return EventsCodeGenerator::ConvertToStringExplicit(property.GetValue());
   } else if (property.GetType() == "Number") {
     return "Number(" +
@@ -400,17 +465,20 @@ gd::String BehaviorCodeGenerator::GenerateDoStepPreEventsPreludeCode() {
 
 gd::String BehaviorCodeGenerator::GetBehaviorSharedPropertyGetterName(
     const gd::String& propertyName) {
-  return "_sharedData." + GetBehaviorSharedPropertyGetterInternalName(propertyName);
+  return "_sharedData." +
+         GetBehaviorSharedPropertyGetterInternalName(propertyName);
 }
 
 gd::String BehaviorCodeGenerator::GetBehaviorSharedPropertySetterName(
     const gd::String& propertyName) {
-  return "_sharedData." + GetBehaviorSharedPropertySetterInternalName(propertyName);
+  return "_sharedData." +
+         GetBehaviorSharedPropertySetterInternalName(propertyName);
 }
 
 gd::String BehaviorCodeGenerator::GetBehaviorSharedPropertyToggleFunctionName(
     const gd::String& propertyName) {
-  return "_sharedData." + GetBehaviorSharedPropertyToggleFunctionInternalName(propertyName);
+  return "_sharedData." +
+         GetBehaviorSharedPropertyToggleFunctionInternalName(propertyName);
 }
 
 gd::String BehaviorCodeGenerator::GetBehaviorSharedPropertyGetterInternalName(
@@ -423,7 +491,8 @@ gd::String BehaviorCodeGenerator::GetBehaviorSharedPropertySetterInternalName(
   return "_set" + propertyName;
 }
 
-gd::String BehaviorCodeGenerator::GetBehaviorSharedPropertyToggleFunctionInternalName(
+gd::String
+BehaviorCodeGenerator::GetBehaviorSharedPropertyToggleFunctionInternalName(
     const gd::String& propertyName) {
   return "_toggle" + propertyName;
 }
