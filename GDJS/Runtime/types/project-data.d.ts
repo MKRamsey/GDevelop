@@ -54,6 +54,10 @@ declare type ObjectNetworkSyncData = {
   beh: {
     [behaviorName: string]: any;
   };
+  var?: VariableSyncData[];
+  eff?: {
+    [effectName: string]: EffectSyncData;
+  };
 };
 
 declare type ForceNetworkSyncData = {
@@ -85,6 +89,13 @@ declare type VariableData = Readonly<{
 
 /** A variable child of a container. Those always have a name. */
 declare type RootVariableData = Omit<VariableData, 'name'> & { name: string };
+
+declare type VariableSyncData = {
+  name: string;
+  value: string | float | boolean;
+  children?: VariableSyncData[];
+  type: VariableType;
+};
 
 /** Properties to set up a behavior. */
 declare type BehaviorData = {
@@ -217,6 +228,13 @@ declare interface EffectData {
   };
   booleanParameters: {
     [name: string]: boolean;
+  };
+}
+
+declare interface EffectSyncData {
+  ena: boolean;
+  fc: {
+    [name: string]: any;
   };
 }
 
