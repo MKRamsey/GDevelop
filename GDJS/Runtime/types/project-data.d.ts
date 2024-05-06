@@ -56,9 +56,15 @@ declare type ObjectNetworkSyncData = {
   beh: {
     [behaviorName: string]: any;
   };
+  /** The variables of the object */
   var?: VariableSyncData[];
+  /** The effects of the object */
   eff?: {
     [effectName: string]: EffectSyncData;
+  };
+  /** The timers of the object */
+  tim?: {
+    [timerName: string]: TimerNetworkSyncData;
   };
 };
 
@@ -68,6 +74,11 @@ declare type ForceNetworkSyncData = {
   a: float;
   l: float;
   m: number;
+};
+
+declare type TimerNetworkSyncData = {
+  time: float;
+  paused: boolean;
 };
 
 declare type VariableType =
@@ -133,6 +144,14 @@ declare interface LayoutData {
   layers: LayerData[];
   behaviorsSharedData: BehaviorSharedData[];
   usedResources: ResourceReference[];
+}
+
+declare interface LayoutNetworkSyncData {
+  var?: VariableSyncData[];
+}
+
+declare interface GameNetworkSyncData {
+  var?: VariableSyncData[];
 }
 
 declare interface EventsFunctionsExtensionData {
