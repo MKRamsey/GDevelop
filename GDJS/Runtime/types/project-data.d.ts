@@ -34,8 +34,8 @@ declare type ObjectData = {
   effects: Array<EffectData>;
 };
 
-/** Object containing initial properties for all objects synchronizing over the network. */
-declare type ObjectNetworkSyncData = {
+/** Object containing basic properties for all objects synchronizing over the network. */
+declare type BasicObjectNetworkSyncData = {
   /** The position of the object on the X axis. */
   x: number;
   /** The position of the object on the Y axis. */
@@ -52,6 +52,13 @@ declare type ObjectNetworkSyncData = {
   pfx: number;
   /** Permanent force on Y */
   pfy: number;
+};
+
+/**
+ * Object containing properties, behaviors, variables, effects and timers
+ * for all objects synchronizing over the network.
+ **/
+declare interface ObjectNetworkSyncData extends BasicObjectNetworkSyncData {
   /** The behaviors of the object */
   beh: {
     [behaviorName: string]: any;
@@ -66,7 +73,7 @@ declare type ObjectNetworkSyncData = {
   tim?: {
     [timerName: string]: TimerNetworkSyncData;
   };
-};
+}
 
 declare type ForceNetworkSyncData = {
   x: float;
