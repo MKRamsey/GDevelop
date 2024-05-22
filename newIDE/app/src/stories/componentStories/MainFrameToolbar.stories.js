@@ -48,10 +48,10 @@ const defaultProps: MainFrameToolbarProps = {
   openShareDialog: () => {},
   isSharingEnabled: true,
 
-  onPreviewWithoutHotReload: () => {},
+  onPreviewWithoutHotReload: async () => {},
   onOpenDebugger: () => {},
-  onNetworkPreview: () => {},
-  onHotReloadPreview: () => {},
+  onNetworkPreview: async () => {},
+  onHotReloadPreview: async () => {},
   setPreviewOverride: () => {},
   canDoNetworkPreview: true,
   isPreviewEnabled: false,
