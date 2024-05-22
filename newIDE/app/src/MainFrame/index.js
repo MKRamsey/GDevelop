@@ -265,6 +265,7 @@ type LaunchPreviewOptions = {
   hotReload?: boolean,
   projectDataOnlyExport?: boolean,
   fullLoadingScreen?: boolean,
+  numberOfWindows?: number,
 };
 
 export type Props = {|
@@ -1527,8 +1528,9 @@ const MainFrame = (props: Props) => {
   );
 
   const _launchPreview = React.useCallback(
-    ({
+    async ({
       networkPreview,
+      numberOfWindows,
       hotReload,
       projectDataOnlyExport,
       fullLoadingScreen,
@@ -1559,7 +1561,7 @@ const MainFrame = (props: Props) => {
           ? currentProject.getExternalLayout(externalLayoutName)
           : null;
 
-      autosaveProjectIfNeeded();
+      await autosaveProjectIfNeeded();
 
       // Note that in the future, this kind of checks could be done
       // and stored in a "diagnostic report", rather than hiding errors
@@ -1573,35 +1575,32 @@ const MainFrame = (props: Props) => {
           }
         : null;
 
-      eventsFunctionsExtensionsState
-        .ensureLoadFinished()
-        .then(() =>
-          previewLauncher.launchPreview({
-            project: currentProject,
-            layout,
-            externalLayout,
-            networkPreview: !!networkPreview,
-            hotReload: !!hotReload,
-            projectDataOnlyExport: !!projectDataOnlyExport,
-            fullLoadingScreen: !!fullLoadingScreen,
-            fallbackAuthor,
-            getIsMenuBarHiddenInPreview:
-              preferences.getIsMenuBarHiddenInPreview,
-            getIsAlwaysOnTopInPreview: preferences.getIsAlwaysOnTopInPreview,
-          })
-        )
-        .catch(error => {
-          console.error(
-            'Error caught while launching preview, this should never happen.',
-            error
-          );
-        })
-        .then(() => {
-          setPreviewLoading(false);
-          if (inAppTutorialOrchestratorRef.current) {
-            inAppTutorialOrchestratorRef.current.onPreviewLaunch();
-          }
+      try {
+        await eventsFunctionsExtensionsState.ensureLoadFinished();
+
+        await previewLauncher.launchPreview({
+          project: currentProject,
+          layout,
+          externalLayout,
+          networkPreview: !!networkPreview,
+          hotReload: !!hotReload,
+          projectDataOnlyExport: !!projectDataOnlyExport,
+          fullLoadingScreen: !!fullLoadingScreen,
+          fallbackAuthor,
+          getIsMenuBarHiddenInPreview: preferences.getIsMenuBarHiddenInPreview,
+          getIsAlwaysOnTopInPreview: preferences.getIsAlwaysOnTopInPreview,
+          numberOfWindows: numberOfWindows || 1,
         });
+        setPreviewLoading(false);
+        if (inAppTutorialOrchestratorRef.current) {
+          inAppTutorialOrchestratorRef.current.onPreviewLaunch();
+        }
+      } catch (error) {
+        console.error(
+          'Error caught while launching preview, this should never happen.',
+          error
+        );
+      }
     },
     [
       autosaveProjectIfNeeded,
@@ -1622,7 +1621,10 @@ const MainFrame = (props: Props) => {
   );
 
   const launchNewPreview = React.useCallback(
-    () => launchPreview({ networkPreview: false }),
+    async options => {
+      const numberOfWindows = options ? options.numberOfWindows : 1;
+      launchPreview({ networkPreview: false, numberOfWindows });
+    },
     [launchPreview]
   );
 

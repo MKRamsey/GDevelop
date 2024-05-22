@@ -12,10 +12,10 @@ import { useResponsiveWindowSize } from '../../UI/Responsive/ResponsiveWindowMea
 import ResponsiveRaisedButton from '../../UI/ResponsiveRaisedButton';
 
 export type PreviewAndShareButtonsProps = {|
-  onPreviewWithoutHotReload: () => void,
+  onPreviewWithoutHotReload: (?{ numberOfWindows: number }) => Promise<void>,
   onOpenDebugger: () => void,
-  onNetworkPreview: () => void,
-  onHotReloadPreview: () => void,
+  onNetworkPreview: () => Promise<void>,
+  onHotReloadPreview: () => Promise<void>,
   setPreviewOverride: ({|
     isPreviewOverriden: boolean,
     overridenPreviewLayoutName: ?string,
@@ -57,9 +57,37 @@ const PreviewAndShareButtons = React.memo<PreviewAndShareButtonsProps>(
           click: onOpenDebugger,
         },
         {
-          label: i18n._(t`Launch another preview in a new window`),
-          click: onPreviewWithoutHotReload,
-          enabled: isPreviewEnabled && hasPreviewsRunning,
+          label: i18n._(t`Launch preview in...`),
+          submenu: [
+            {
+              label: i18n._(t`A new window`),
+              click: async () => {
+                await onPreviewWithoutHotReload({ numberOfWindows: 1 });
+              },
+              enabled: isPreviewEnabled,
+            },
+            {
+              label: i18n._(t`2 previews in 2 windows`),
+              click: async () => {
+                await onPreviewWithoutHotReload({ numberOfWindows: 2 });
+              },
+              enabled: isPreviewEnabled && !hasPreviewsRunning,
+            },
+            {
+              label: i18n._(t`3 previews in 3 windows`),
+              click: async () => {
+                onPreviewWithoutHotReload({ numberOfWindows: 3 });
+              },
+              enabled: isPreviewEnabled && !hasPreviewsRunning,
+            },
+            {
+              label: i18n._(t`4 previews in 4 windows`),
+              click: async () => {
+                onPreviewWithoutHotReload({ numberOfWindows: 4 });
+              },
+              enabled: isPreviewEnabled && !hasPreviewsRunning,
+            },
+          ],
         },
         { type: 'separator' },
         ...(previewState.overridenPreviewLayoutName
